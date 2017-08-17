@@ -150,6 +150,12 @@ function set_lunch_paths()
         echo "Couldn't locate the top of the tree.  Try setting TOP."
         return
     fi
+    if (echo -n $1 | grep -q -e "^aosp_") ; then
+        CUSTOM_BUILD=$(echo -n $1 | sed -e 's/^aosp_//g')
+    else
+        CUSTOM_BUILD=
+    fi
+    export CUSTOM_BUILD
 
     ##################################################################
     #                                                                #
@@ -495,6 +501,8 @@ function lunch()
         return 1
     fi
 
+    check_product $product
+
     _lunch_meat $product $release $variant
 }
 
@@ -523,6 +531,8 @@ function _lunch_meat()
     export TARGET_BUILD_TYPE=release
 
     [[ -n "${ANDROID_QUIET_BUILD:-}" ]] || echo
+
+    fixup_common_out_dir
 
     set_stuff_for_environment
     [[ -n "${ANDROID_QUIET_BUILD:-}" ]] || printconfig
